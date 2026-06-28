@@ -1,0 +1,49 @@
+# Environment and secrets
+.env
+.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.so
+
+# Test and coverage
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Type checking
+.mypy_cache/
+
+# Ruff
+.ruff_cache/
+
+# Runtime results (never commit real API output accidentally)
+results/*.json
+# Exception: keep the structured benchmark file committed
+!eval/benchmark_results.json
+
+# Temp files from sandbox executor
+*.diff.tmp
+/tmp/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Virtualenvs
+venv/
+.venv/
+env/

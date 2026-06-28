@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "model": "claude-sonnet-4-6",
+    "evaluated_at": "not_yet_run",
+    "swebench_split": "lite",
+    "total_tasks_evaluated": 0,
+    "instructions": "Run `python scripts/run_swebench.py` to populate this file with real results."
+  },
+  "summary": {
+    "total_tasks": 0,
+    "passed": 0,
+    "failed": 0,
+    "pass_at_1": 0.0,
+    "avg_iterations": 0.0,
+    "avg_cost_usd": 0.0,
+    "total_cost_usd": 0.0,
+    "avg_time_seconds": 0.0,
+    "cost_per_success": null,
+    "total_tokens": 0,
+    "avg_llm_calls": 0.0
+  },
+  "tasks": []
+}

@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  # Sandbox image build — used by the executor at runtime
+  sandbox:
+    build:
+      context: ./sandbox
+      dockerfile: Dockerfile
+    image: self-healing-agent-sandbox:latest
+    # No ports or volumes here — executor manages per-container mounts at runtime
+    profiles:
+      - build-only  # `docker compose --profile build-only build` to pre-build
+
+  # Development convenience: run the agent against a local repo
+  agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev  # optional; use pip install -e ".[dev]" locally instead
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_REPO=${GITHUB_REPO}
+      - AGENT_MODEL=${AGENT_MODEL:-claude-sonnet-4-6}
+      - AGENT_MAX_ITERATIONS=${AGENT_MAX_ITERATIONS:-5}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - DRY_RUN=${DRY_RUN:-false}
+    volumes:
+      - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock  # agent needs to spawn sandbox containers
+      - ./results:/app/results
+    working_dir: /app
+    profiles:
+      - agent
