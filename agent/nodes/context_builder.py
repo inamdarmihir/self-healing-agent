@@ -204,6 +204,40 @@ def build_context(state: AgentState) -> dict:  # type: ignore[type-arg]
 
             _add_file(module_file, f"imported by {test_path.name}")
 
+    # Step 3: semantic search via Qdrant
+    # Augments the import-graph results with files that are semantically
+    # relevant to the issue description and failing tests but not directly
+    # imported.  Degrades gracefully if qdrant-client is not installed.
+    try:
+        from agent.nodes.qdrant_store import search_relevant_files
+
+        query_parts: list[str] = []
+        issue_desc: str = state.get("issue_description", "") or ""  # type: ignore[assignment]
+        if issue_desc:
+            query_parts.append(issue_desc)
+        query_parts.extend(failing_tests)
+        semantic_query = "\n".join(query_parts)
+
+        semantic_hits = search_relevant_files(
+            query=semantic_query,
+            repo_path=str(repo_path),
+            top_k=5,
+        )
+        for rel_path in semantic_hits:
+            if tokens_used >= _TOKEN_CAP:
+                logger.info("Token budget exhausted; stopping semantic search")
+                break
+            candidate = repo_path / rel_path
+            if candidate.exists():
+                _add_file(candidate, "semantic search (Qdrant)")
+    except ImportError:
+        logger.info(
+            "qdrant-client not installed; skipping semantic search "
+            "(install with: pip install 'qdrant-client[fastembed]')"
+        )
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Qdrant semantic search failed: %s", exc)
+
     logger.info(
         "Context built — %d files, %d tokens | included: %s | excluded: %s",
         len(relevant_files),

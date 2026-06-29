@@ -11,6 +11,18 @@ services:
     profiles:
       - build-only  # `docker compose --profile build-only build` to pre-build
 
+
+  # Qdrant vector store — used by context_builder for semantic file search.
+  # Access from the agent container via QDRANT_URL=http://qdrant:6333
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"   # REST
+      - "6334:6334"   # gRPC
+    volumes:
+      - qdrant_data:/qdrant/storage
+    restart: unless-stopped
+
   # Development convenience: run the agent against a local repo
   agent:
     build:
@@ -24,6 +36,8 @@ services:
       - AGENT_MAX_ITERATIONS=${AGENT_MAX_ITERATIONS:-5}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - DRY_RUN=${DRY_RUN:-false}
+      - QDRANT_URL=${QDRANT_URL:-http://qdrant:6333}
+      - QDRANT_API_KEY=${QDRANT_API_KEY:-}
     volumes:
       - .:/app
       - /var/run/docker.sock:/var/run/docker.sock  # agent needs to spawn sandbox containers
@@ -31,3 +45,8 @@ services:
     working_dir: /app
     profiles:
       - agent
+    depends_on:
+      - qdrant
+
+volumes:
+  qdrant_data:
